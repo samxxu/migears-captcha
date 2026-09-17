@@ -1,0 +1,27 @@
+{
+    "name": "migears/captcha",
+    "description": "A lightweight captcha generator for PHP 8.1+ with GD extension",
+    "type": "library",
+    "license": "MIT",
+    "version": "2.0.0",
+    "require": {
+        "php": "^8.1"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^10.0"
+    },
+    "suggest": {
+        "ext-gd": "Required to generate captcha images",
+        "ext-mbstring": "Required for multibyte string support"
+    },
+    "autoload": {
+        "psr-4": {
+            "MiGears\\Captcha\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "MiGears\\Captcha\\Tests\\": "tests/"
+        }
+    }
+}
