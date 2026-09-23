@@ -9,6 +9,7 @@ A lightweight captcha generation library for PHP 8.1+, with zero required depend
 - Generates random captcha strings (numbers + letters, configurable length and character set)
 - Generates captcha images (configurable width/height, font, interference lines, noise dots)
 - Math captcha mode (`math: true`) — an arithmetic puzzle instead of random characters
+- Preset difficulty levels (`easy` / `medium` / `hard`) tune noise, lines and distortion
 - Supports custom TTF fonts
 - Supports three output formats: PNG, JPEG, GIF
 - `CaptchaResult` is a `readonly` value object
@@ -74,6 +75,28 @@ Uses `+`, `-`, `*` with operands 1–9; subtraction is always positive. When
 `width`/`height` are omitted, math mode defaults to 170×50 (wider to fit the
 extra characters).
 
+### Difficulty
+
+Pick a preset that tunes noise, interference lines and character distortion
+(rotation + vertical drift):
+
+```php
+use MiGears\Captcha\Difficulty;
+
+$captcha = new Captcha(difficulty: Difficulty::Hard);
+```
+
+| Level | noiseLevel | lineCount | rotation | drift |
+|-------|-----------|-----------|----------|-------|
+| `Easy` | 20 | 1 | ±12° | 3px |
+| `Medium` | 50 | 3 | ±22° | 6px |
+| `Hard` | 80 | 6 | ±35° | 10px |
+
+Explicit `noiseLevel` / `lineCount` always override the preset. When
+`difficulty` is omitted, the package keeps its original defaults (50 noise, 3
+lines, no drift), so existing behavior is unchanged. `Difficulty::Medium` is a
+good middle ground when you want moderate distortion.
+
 ## Configuration Options
 
 | Parameter | Type | Default | Description |
@@ -83,10 +106,11 @@ extra characters).
 | `height` | `?int` | `40` (50 in math mode) | Image height in pixels |
 | `font` | `?string` | Built-in font | Custom TTF font file path |
 | `format` | `ImageFormat` | `ImageFormat::Png` | Output image format |
-| `noiseLevel` | `int` | `50` | Number of noise dots |
-| `lineCount` | `int` | `3` | Number of interference lines |
+| `noiseLevel` | `?int` | preset-dependent | Number of noise dots |
+| `lineCount` | `?int` | preset-dependent | Number of interference lines |
 | `chars` | `string` | See below | Captcha character set (ignored in math mode) |
 | `math` | `bool` | `false` | Render an arithmetic puzzle instead of random characters |
+| `difficulty` | `?Difficulty` | `null` | Preset that tunes noise, lines and distortion |
 
 Default character set (easily confused characters 0/O/1/l/I removed):
 ```
@@ -193,6 +217,7 @@ MIT
 - 生成随机验证码字符串（数字+字母，可配置长度和字符集）
 - 生成验证码图片（可配置宽高、字体、干扰线、噪点）
 - 数学算式验证码模式（`math: true`）——用算术题替代随机字符
+- 预设难度档位（`easy` / `medium` / `hard`）统一调整噪点、干扰线与扭曲
 - 支持自定义 TTF 字体
 - 支持 PNG、JPEG、GIF 三种输出格式
 - `CaptchaResult` 为 `readonly` 值对象
@@ -257,6 +282,26 @@ $ok = $verifier->verify($input, $result->code);
 使用 `+`、`-`、`*`，操作数为 1–9，减法恒为正。当未显式指定 `width`/`height`
 时，数学模式下默认 170×50（更宽以容纳额外字符）。
 
+### 难度档位
+
+通过预设档位统一调整噪点、干扰线与字符扭曲（旋转角 + 垂直漂移）：
+
+```php
+use MiGears\Captcha\Difficulty;
+
+$captcha = new Captcha(difficulty: Difficulty::Hard);
+```
+
+| 档位 | noiseLevel | lineCount | 旋转角 | 漂移 |
+|------|-----------|-----------|--------|------|
+| `Easy` | 20 | 1 | ±12° | 3px |
+| `Medium` | 50 | 3 | ±22° | 6px |
+| `Hard` | 80 | 6 | ±35° | 10px |
+
+显式传入的 `noiseLevel` / `lineCount` 始终优先于预设。当不指定 `difficulty`
+时，包保持原有默认（50 噪点、3 干扰线、无漂移），现有行为不变。想获得适度
+扭曲时，`Difficulty::Medium` 是不错的中间档。
+
 ## 配置选项
 
 | 参数 | 类型 | 默认值 | 说明 |
@@ -266,10 +311,11 @@ $ok = $verifier->verify($input, $result->code);
 | `height` | `?int` | `40`（数学模式 50） | 图片高度（像素） |
 | `font` | `?string` | 内置字体 | 自定义 TTF 字体文件路径 |
 | `format` | `ImageFormat` | `ImageFormat::Png` | 输出图片格式 |
-| `noiseLevel` | `int` | `50` | 噪点数量 |
-| `lineCount` | `int` | `3` | 干扰线数量 |
+| `noiseLevel` | `?int` | 随档位而定 | 噪点数量 |
+| `lineCount` | `?int` | 随档位而定 | 干扰线数量 |
 | `chars` | `string` | 见下 | 验证码字符集（数学模式忽略） |
 | `math` | `bool` | `false` | 用算术题替代随机字符 |
+| `difficulty` | `?Difficulty` | `null` | 预设档位，统一调整噪点/干扰线/扭曲 |
 
 默认字符集（已去除易混淆字符 0/O/1/l/I）：
 ```

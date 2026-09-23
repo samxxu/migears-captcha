@@ -15,16 +15,21 @@ class Captcha
     /** @var string[] One character per element (multibyte-aware). */
     private array $charSet;
 
+    private int $angleRange;
+
+    private int $yDrift;
+
     public function __construct(
         private int $length = 4,
         private ?int $width = null,
         private ?int $height = null,
         private ?string $font = null,
         private ImageFormat $format = ImageFormat::Png,
-        private int $noiseLevel = 50,
-        private int $lineCount = 3,
+        private ?int $noiseLevel = null,
+        private ?int $lineCount = null,
         private string $chars = self::DEFAULT_CHARS,
         private bool $math = false,
+        private ?Difficulty $difficulty = null,
     ) {
         if (!extension_loaded('gd')) {
             throw new CaptchaException('GD extension is required to generate captcha images.');
@@ -39,6 +44,21 @@ class Captcha
         // Math captchas carry more characters (operands + operator + "= ?"), so widen by default
         $this->width ??= $this->math ? 170 : 120;
         $this->height ??= $this->math ? 50 : 40;
+
+        // Difficulty presets tune noise, interference lines and distortion.
+        // Explicit noiseLevel/lineCount win; omitting difficulty keeps the
+        // original no-drift rendering (drift defaults to 0), so defaults never change.
+        [$dNoise, $dLines, $dAngle, $dDrift] = $this->difficulty === null
+            ? [50, 3, 20, 0]
+            : match ($this->difficulty) {
+                Difficulty::Easy   => [20, 1, 12, 3],
+                Difficulty::Medium => [50, 3, 22, 6],
+                Difficulty::Hard   => [80, 6, 35, 10],
+            };
+        $this->noiseLevel ??= $dNoise;
+        $this->lineCount ??= $dLines;
+        $this->angleRange = $dAngle;
+        $this->yDrift = $dDrift;
 
         if ($this->length < 1) {
             throw new CaptchaException('Length must be at least 1.');
@@ -150,9 +170,9 @@ class Captcha
         $step = $this->width / count($characters);
 
         for ($i = 0; $i < count($characters); $i++) {
-            $angle = random_int(-20, 20);
+            $angle = random_int(-$this->angleRange, $this->angleRange);
             $x = (int) ($i * $step + $step * 0.2);
-            $y = (int) ($this->height * 0.7);
+            $y = (int) ($this->height * 0.7) + random_int(-$this->yDrift, $this->yDrift);
             $color = $this->randomDarkColor($image);
             imagettftext($image, $fontSize, $angle, $x, $y, $color, $this->font, $characters[$i]);
         }

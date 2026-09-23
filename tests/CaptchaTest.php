@@ -9,6 +9,7 @@ use MiGears\Captcha\Captcha;
 use MiGears\Captcha\CaptchaResult;
 use MiGears\Captcha\ImageFormat;
 use MiGears\Captcha\CaptchaVerifier;
+use MiGears\Captcha\Difficulty;
 use MiGears\Captcha\Exception\CaptchaException;
 
 final class CaptchaTest extends TestCase
@@ -205,6 +206,73 @@ final class CaptchaTest extends TestCase
         $this->assertSame('png', ImageFormat::Png->value);
         $this->assertSame('jpeg', ImageFormat::Jpeg->value);
         $this->assertSame('gif', ImageFormat::Gif->value);
+    }
+
+    private function internal(string $prop, Captcha $captcha): int|string
+    {
+        $reflection = new \ReflectionProperty(Captcha::class, $prop);
+
+        return $reflection->getValue($captcha);
+    }
+
+    public function testAllDifficultyLevelsGenerate(): void
+    {
+        foreach (Difficulty::cases() as $difficulty) {
+            $result = (new Captcha(difficulty: $difficulty))->generate();
+
+            $this->assertNotEmpty($result->code);
+            $this->assertNotEmpty($result->imageData);
+            $this->assertSame(4, strlen($result->code));
+        }
+    }
+
+    public function testDifficultyScalesInternalParameters(): void
+    {
+        $easy = new Captcha(difficulty: Difficulty::Easy);
+        $hard = new Captcha(difficulty: Difficulty::Hard);
+
+        // Hard must increase noise, interference lines, rotation and drift
+        $this->assertGreaterThan(
+            $this->internal('noiseLevel', $easy),
+            $this->internal('noiseLevel', $hard),
+        );
+        $this->assertGreaterThan(
+            $this->internal('lineCount', $easy),
+            $this->internal('lineCount', $hard),
+        );
+        $this->assertGreaterThan(
+            $this->internal('angleRange', $easy),
+            $this->internal('angleRange', $hard),
+        );
+        $this->assertGreaterThan(
+            $this->internal('yDrift', $easy),
+            $this->internal('yDrift', $hard),
+        );
+    }
+
+    public function testExplicitNoiseOverridesDifficulty(): void
+    {
+        $captcha = new Captcha(difficulty: Difficulty::Hard, noiseLevel: 5);
+
+        $this->assertSame(5, $this->internal('noiseLevel', $captcha));
+    }
+
+    public function testOmittedDifficultyKeepsLegacyDefaults(): void
+    {
+        $captcha = new Captcha();
+
+        // Original rendering: no drift, noise 50, lines 3
+        $this->assertSame(50, $this->internal('noiseLevel', $captcha));
+        $this->assertSame(3, $this->internal('lineCount', $captcha));
+        $this->assertSame(0, $this->internal('yDrift', $captcha));
+    }
+
+    public function testDifficultyComposesWithMath(): void
+    {
+        $result = (new Captcha(math: true, difficulty: Difficulty::Easy))->generate();
+
+        $this->assertNotEmpty($result->imageData);
+        $this->assertMatchesRegularExpression('/^\d+$/', $result->code);
     }
 
     public function testMathModeProducesNumericAnswerAndImage(): void
