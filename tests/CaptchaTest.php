@@ -8,6 +8,7 @@ use PHPUnit\Framework\TestCase;
 use MiGears\Captcha\Captcha;
 use MiGears\Captcha\CaptchaResult;
 use MiGears\Captcha\ImageFormat;
+use MiGears\Captcha\CaptchaVerifier;
 use MiGears\Captcha\Exception\CaptchaException;
 
 final class CaptchaTest extends TestCase
@@ -204,6 +205,54 @@ final class CaptchaTest extends TestCase
         $this->assertSame('png', ImageFormat::Png->value);
         $this->assertSame('jpeg', ImageFormat::Jpeg->value);
         $this->assertSame('gif', ImageFormat::Gif->value);
+    }
+
+    public function testMathModeProducesNumericAnswerAndImage(): void
+    {
+        $captcha = new Captcha(math: true);
+        $result = $captcha->generate();
+
+        // The answer must be a non-empty integer
+        $this->assertMatchesRegularExpression('/^\d+$/', $result->code);
+        $this->assertSame('image/png', $result->mimeType);
+        $this->assertNotEmpty($result->imageData);
+    }
+
+    public function testMathAnswerRangeIsSane(): void
+    {
+        $captcha = new Captcha(math: true);
+        $answers = [];
+        for ($i = 0; $i < 100; $i++) {
+            $answers[] = (int) $captcha->generate()->code;
+        }
+
+        // +: 2..18, -: 1..9, *: 1..81 combined => within 1..81
+        foreach ($answers as $a) {
+            $this->assertGreaterThanOrEqual(1, $a);
+            $this->assertLessThanOrEqual(81, $a);
+        }
+    }
+
+    public function testMathModeWorksWithVerifier(): void
+    {
+        $captcha = new Captcha(math: true);
+        $verifier = new CaptchaVerifier();
+
+        for ($i = 0; $i < 20; $i++) {
+            $result = $captcha->generate();
+            $this->assertTrue($verifier->verify($result->code, $result->code));
+        }
+    }
+
+    public function testMathRenderedImageIsValid(): void
+    {
+        $captcha = new Captcha(math: true);
+        $result = $captcha->generate();
+
+        $image = imagecreatefromstring($result->imageData);
+        $this->assertNotFalse($image);
+        $this->assertSame(170, imagesx($image));
+        $this->assertSame(50, imagesy($image));
     }
 
     public function testMultipleGeneratesProduceDifferentCodes(): void

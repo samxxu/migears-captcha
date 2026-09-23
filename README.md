@@ -8,6 +8,7 @@ A lightweight captcha generation library for PHP 8.1+, with zero required depend
 
 - Generates random captcha strings (numbers + letters, configurable length and character set)
 - Generates captcha images (configurable width/height, font, interference lines, noise dots)
+- Math captcha mode (`math: true`) — an arithmetic puzzle instead of random characters
 - Supports custom TTF fonts
 - Supports three output formats: PNG, JPEG, GIF
 - `CaptchaResult` is a `readonly` value object
@@ -52,18 +53,40 @@ echo $result->mimeType;   // image/png
 echo $result->toDataUri();// data:image/png;base64,...
 ```
 
+### Math Mode
+
+Pass `math: true` to render an arithmetic puzzle instead of random characters.
+The `code` is the arithmetic result, which is what you store and verify:
+
+```php
+$captcha = new Captcha(math: true);
+
+$result = $captcha->generate();
+
+// The image shows e.g. "7 + 3 = ?"
+echo $result->code;   // "10" — the answer
+
+// Verifying the user's typed answer:
+$ok = $verifier->verify($input, $result->code);
+```
+
+Uses `+`, `-`, `*` with operands 1–9; subtraction is always positive. When
+`width`/`height` are omitted, math mode defaults to 170×50 (wider to fit the
+extra characters).
+
 ## Configuration Options
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
-| `length` | `int` | `4` | Captcha character length |
-| `width` | `int` | `120` | Image width in pixels |
-| `height` | `int` | `40` | Image height in pixels |
+| `length` | `int` | `4` | Captcha character length (ignored in math mode) |
+| `width` | `?int` | `120` (170 in math mode) | Image width in pixels |
+| `height` | `?int` | `40` (50 in math mode) | Image height in pixels |
 | `font` | `?string` | Built-in font | Custom TTF font file path |
 | `format` | `ImageFormat` | `ImageFormat::Png` | Output image format |
 | `noiseLevel` | `int` | `50` | Number of noise dots |
 | `lineCount` | `int` | `3` | Number of interference lines |
-| `chars` | `string` | See below | Captcha character set |
+| `chars` | `string` | See below | Captcha character set (ignored in math mode) |
+| `math` | `bool` | `false` | Render an arithmetic puzzle instead of random characters |
 
 Default character set (easily confused characters 0/O/1/l/I removed):
 ```
@@ -169,6 +192,7 @@ MIT
 
 - 生成随机验证码字符串（数字+字母，可配置长度和字符集）
 - 生成验证码图片（可配置宽高、字体、干扰线、噪点）
+- 数学算式验证码模式（`math: true`）——用算术题替代随机字符
 - 支持自定义 TTF 字体
 - 支持 PNG、JPEG、GIF 三种输出格式
 - `CaptchaResult` 为 `readonly` 值对象
@@ -213,18 +237,39 @@ echo $result->mimeType;   // image/png
 echo $result->toDataUri();// data:image/png;base64,...
 ```
 
+### 数学算式模式
+
+传入 `math: true` 渲染一道算术题，而非随机字符。`code` 即为算术结果，
+用于存储和校验：
+
+```php
+$captcha = new Captcha(math: true);
+
+$result = $captcha->generate();
+
+// 图片显示例如 "7 + 3 = ?"
+echo $result->code;   // "10" —— 答案
+
+// 校验用户输入的答案：
+$ok = $verifier->verify($input, $result->code);
+```
+
+使用 `+`、`-`、`*`，操作数为 1–9，减法恒为正。当未显式指定 `width`/`height`
+时，数学模式下默认 170×50（更宽以容纳额外字符）。
+
 ## 配置选项
 
 | 参数 | 类型 | 默认值 | 说明 |
 |------|------|--------|------|
-| `length` | `int` | `4` | 验证码字符长度 |
-| `width` | `int` | `120` | 图片宽度（像素） |
-| `height` | `int` | `40` | 图片高度（像素） |
+| `length` | `int` | `4` | 验证码字符长度（数学模式忽略） |
+| `width` | `?int` | `120`（数学模式 170） | 图片宽度（像素） |
+| `height` | `?int` | `40`（数学模式 50） | 图片高度（像素） |
 | `font` | `?string` | 内置字体 | 自定义 TTF 字体文件路径 |
 | `format` | `ImageFormat` | `ImageFormat::Png` | 输出图片格式 |
 | `noiseLevel` | `int` | `50` | 噪点数量 |
 | `lineCount` | `int` | `3` | 干扰线数量 |
-| `chars` | `string` | 见下 | 验证码字符集 |
+| `chars` | `string` | 见下 | 验证码字符集（数学模式忽略） |
+| `math` | `bool` | `false` | 用算术题替代随机字符 |
 
 默认字符集（已去除易混淆字符 0/O/1/l/I）：
 ```

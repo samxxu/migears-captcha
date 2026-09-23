@@ -17,13 +17,14 @@ class Captcha
 
     public function __construct(
         private int $length = 4,
-        private int $width = 120,
-        private int $height = 40,
+        private ?int $width = null,
+        private ?int $height = null,
         private ?string $font = null,
         private ImageFormat $format = ImageFormat::Png,
         private int $noiseLevel = 50,
         private int $lineCount = 3,
         private string $chars = self::DEFAULT_CHARS,
+        private bool $math = false,
     ) {
         if (!extension_loaded('gd')) {
             throw new CaptchaException('GD extension is required to generate captcha images.');
@@ -34,6 +35,10 @@ class Captcha
         if (!is_file($this->font)) {
             throw new CaptchaException(sprintf('Font file not found: %s', $this->font));
         }
+
+        // Math captchas carry more characters (operands + operator + "= ?"), so widen by default
+        $this->width ??= $this->math ? 170 : 120;
+        $this->height ??= $this->math ? 50 : 40;
 
         if ($this->length < 1) {
             throw new CaptchaException('Length must be at least 1.');
@@ -59,8 +64,7 @@ class Captcha
      */
     public function generate(): CaptchaResult
     {
-        $characters = $this->generateCharacters();
-        $code = implode('', $characters);
+        [$characters, $code] = $this->generatePuzzle();
         $image = $this->createImage($characters);
 
         ob_start();
@@ -76,6 +80,43 @@ class Captcha
             code: $code,
             mimeType: $this->format->mimeType(),
         );
+    }
+
+    /**
+     * The expected answer is always the `code`. In char mode the code is the
+     * random string shown in the image; in math mode it is the arithmetic result.
+     *
+     * @return array{0: string[], 1: string}
+     */
+    private function generatePuzzle(): array
+    {
+        if ($this->math) {
+            $a = random_int(1, 9);
+            $b = random_int(1, 9);
+            $op = ['+', '-', '*'][random_int(0, 2)];
+            if ($op === '-') {
+                // keep subtraction positive: 2 <= a <= 9, 1 <= b < a
+                $a = random_int(2, 9);
+                $b = random_int(1, $a - 1);
+            }
+            $answer = match ($op) {
+                '+' => $a + $b,
+                '-' => $a - $b,
+                '*' => $a * $b,
+            };
+            $characters = preg_split(
+                '//u',
+                sprintf('%d %s %d = ?', $a, $op, $b),
+                -1,
+                PREG_SPLIT_NO_EMPTY,
+            );
+
+            return [$characters, (string) $answer];
+        }
+
+        $characters = $this->generateCharacters();
+
+        return [$characters, implode('', $characters)];
     }
 
     /**
