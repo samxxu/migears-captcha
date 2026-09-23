@@ -170,6 +170,42 @@ if (!$_SESSION['captcha_used'] && time() < $_SESSION['captcha_expires_at']) {
 }
 ```
 
+## Composite Example
+
+Combining everything: a high-strength math captcha rendered to PNG, answered
+once within a 5-minute window, verified with timing-safe comparison:
+
+```php
+use MiGears\Captcha\Captcha;
+use MiGears\Captcha\Difficulty;
+use MiGears\Captcha\CaptchaVerifier;
+
+// Build a high-strength math captcha
+$captcha = new Captcha(
+    math: true,
+    difficulty: Difficulty::Hard,
+    format: \MiGears\Captcha\ImageFormat::Png,
+);
+
+$result = $captcha->generate();
+
+// Store the answer (the math result) and an expiry
+$_SESSION['captcha_code'] = $result->code;
+$_SESSION['captcha_expires_at'] = time() + 300; // 5 minutes
+
+// Serve the image
+header('Content-Type: ' . $result->mimeType);
+echo $result->imageData;
+
+// ... later, validate the user's answer exactly once:
+$verifier = new CaptchaVerifier();
+$ok = time() < $_SESSION['captcha_expires_at']
+    && $verifier->verify($_POST['captcha'] ?? '', $_SESSION['captcha_code']);
+
+// Consume regardless of the outcome so a code can't be reused
+unset($_SESSION['captcha_code'], $_SESSION['captcha_expires_at']);
+```
+
 ## Multibyte Note
 
 The character set is multibyte-aware: a code generated from the default ASCII
@@ -373,6 +409,43 @@ if (!$_SESSION['captcha_used'] && time() < $_SESSION['captcha_expires_at']) {
         $_SESSION['captcha_used'] = true; // 消费
     }
 }
+```
+
+## 完整示例
+
+组合所有能力：生成一张高强度数学验证码 PNG，限定 5 分钟内一次性作答，
+并用常时比较校验：
+
+```php
+use MiGears\Captcha\Captcha;
+use MiGears\Captcha\Difficulty;
+use MiGears\Captcha\ImageFormat;
+use MiGears\Captcha\CaptchaVerifier;
+
+// 构建高强度数学验证码
+$captcha = new Captcha(
+    math: true,
+    difficulty: Difficulty::Hard,
+    format: ImageFormat::Png,
+);
+
+$result = $captcha->generate();
+
+// 存储答案（算术结果）与过期时间
+$_SESSION['captcha_code'] = $result->code;
+$_SESSION['captcha_expires_at'] = time() + 300; // 5 分钟
+
+// 输出图片
+header('Content-Type: ' . $result->mimeType);
+echo $result->imageData;
+
+// ……稍后，仅允许一次性校验用户的答案：
+$verifier = new CaptchaVerifier();
+$ok = time() < $_SESSION['captcha_expires_at']
+    && $verifier->verify($_POST['captcha'] ?? '', $_SESSION['captcha_code']);
+
+// 无论对错都消费，避免验证码被复用
+unset($_SESSION['captcha_code'], $_SESSION['captcha_expires_at']);
 ```
 
 ## 多字节说明

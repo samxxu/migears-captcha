@@ -257,6 +257,15 @@ final class CaptchaTest extends TestCase
         $this->assertSame(5, $this->internal('noiseLevel', $captcha));
     }
 
+    public function testExplicitLineCountOverridesDifficulty(): void
+    {
+        $captcha = new Captcha(difficulty: Difficulty::Hard, lineCount: 0);
+
+        $this->assertSame(0, $this->internal('lineCount', $captcha));
+        // Hard's noise still applies since only lineCount was overridden
+        $this->assertSame(80, $this->internal('noiseLevel', $captcha));
+    }
+
     public function testOmittedDifficultyKeepsLegacyDefaults(): void
     {
         $captcha = new Captcha();
