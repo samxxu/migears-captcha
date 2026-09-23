@@ -11,6 +11,8 @@ A lightweight captcha generation library for PHP 8.1+, with zero required depend
 - Supports custom TTF fonts
 - Supports three output formats: PNG, JPEG, GIF
 - `CaptchaResult` is a `readonly` value object
+- Multibyte-aware character sets (e.g. CJK)
+- `CaptchaVerifier` provides timing-safe, case-optional validation
 - Zero required dependencies (GD extension is suggested)
 - Minimalist API, outputs nothing, only returns data
 
@@ -84,6 +86,51 @@ header('Content-Type: ' . $result->mimeType);
 echo $result->imageData;
 ```
 
+## Verification
+
+Compare a user-submitted answer against the stored code with `CaptchaVerifier`.
+It wraps [timing-safe comparison](https://www.php.net/hash_equals) and optional
+case folding, so callers don't have to implement these details themselves.
+
+```php
+use MiGears\Captcha\CaptchaVerifier;
+
+$verifier = new CaptchaVerifier();
+
+// Case-insensitive by default
+$verifier->verify('a3fk', 'a3fK'); // true
+
+// Case-sensitive
+$verifier->verify('a3fk', 'a3fK', caseInsensitive: false); // false
+
+// Empty inputs always fail, no exception is thrown
+$verifier->verify('', 'a3fK'); // false
+```
+
+Like storage, **expiry and one-time consumption are left to the caller**. The
+library does not track when a code was issued or whether it was already used:
+
+```php
+$_SESSION['captcha_expires_at'] = time() + 300; // 5 minutes
+$_SESSION['captcha_used'] = false;
+
+// On submission:
+if (!$_SESSION['captcha_used'] && time() < $_SESSION['captcha_expires_at']) {
+    $ok = $verifier->verify($input, $_SESSION['captcha_code']);
+    if ($ok) {
+        $_SESSION['captcha_used'] = true; // consume
+    }
+}
+```
+
+## Multibyte Note
+
+The character set is multibyte-aware: a code generated from the default ASCII
+set or a UTF-8 set (e.g. Chinese) is always valid output. **However, images are
+rendered with the bundled `assets/captcha.ttf`, which only contains Latin
+glyphs.** To render non-Latin codes (CJK, Cyrillic, etc.), pass a font that
+covers those characters via the `font` option.
+
 ## Exceptions
 
 On failure, throws `MiGears\Captcha\Exception\CaptchaException`:
@@ -125,6 +172,8 @@ MIT
 - 支持自定义 TTF 字体
 - 支持 PNG、JPEG、GIF 三种输出格式
 - `CaptchaResult` 为 `readonly` 值对象
+- 字符集支持多字节（如中文）
+- `CaptchaVerifier` 提供常时安全、可选忽略大小的校验
 - 零强制依赖（GD 扩展为建议依赖）
 - 极简 API，不输出任何内容，仅返回数据
 
@@ -197,6 +246,50 @@ $_SESSION['captcha_code'] = $result->code;
 header('Content-Type: ' . $result->mimeType);
 echo $result->imageData;
 ```
+
+## 验证码校验
+
+使用 `CaptchaVerifier` 将用户提交的答案与已存储的 code 进行比较。它封装了
+[常时比较](https://www.php.net/hash_equals) 和可选的大小写折叠，调用方无需
+自己实现这些细节。
+
+```php
+use MiGears\Captcha\CaptchaVerifier;
+
+$verifier = new CaptchaVerifier();
+
+// 默认忽略大小写
+$verifier->verify('a3fk', 'a3fK'); // true
+
+// 区分大小写
+$verifier->verify('a3fk', 'a3fK', caseInsensitive: false); // false
+
+// 空输入恒为 false，不抛异常
+$verifier->verify('', 'a3fK'); // false
+```
+
+与存储一样，**过期与一次性消费由调用方负责**。本库不追踪 code 的签发时间，
+也不记录是否已被用过：
+
+```php
+$_SESSION['captcha_expires_at'] = time() + 300; // 5 分钟过期
+$_SESSION['captcha_used'] = false;
+
+// 用户提交时：
+if (!$_SESSION['captcha_used'] && time() < $_SESSION['captcha_expires_at']) {
+    $ok = $verifier->verify($input, $_SESSION['captcha_code']);
+    if ($ok) {
+        $_SESSION['captcha_used'] = true; // 消费
+    }
+}
+```
+
+## 多字节说明
+
+字符集支持多字节：无论用默认 ASCII 字符集还是 UTF-8 字符集（如中文），生成
+的 code 都是合法的。**但图片使用内置 `assets/captcha.ttf` 渲染，该字体仅含
+拉丁字形。** 若要渲染非拉丁字符（中文、西里尔等），请通过 `font` 选项传入
+支持这些字符的字体。
 
 ## 异常
 
