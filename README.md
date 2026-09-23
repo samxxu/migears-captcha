@@ -2,7 +2,7 @@
 
 ![Version](https://img.shields.io/badge/version-2.0.0-blue)
 
-A lightweight captcha generation library for PHP 8.1+, with zero required dependencies.
+A lightweight captcha generation library for PHP 8.1+, requiring the GD extension to render images.
 
 > **Background**: miGears is the open-source successor of **TinyGears**, a
 > self-developed PHP framework. It was renamed and open-sourced recently because
@@ -19,7 +19,7 @@ A lightweight captcha generation library for PHP 8.1+, with zero required depend
 - `CaptchaResult` is a `readonly` value object
 - Multibyte-aware character sets (e.g. CJK)
 - `CaptchaVerifier` provides timing-safe, case-optional validation
-- Zero required dependencies (GD extension is suggested)
+- Requires the GD extension (images are rendered with GD)
 - Minimalist API, outputs nothing, only returns data
 
 ## Installation
@@ -28,7 +28,7 @@ A lightweight captcha generation library for PHP 8.1+, with zero required depend
 composer require migears/captcha
 ```
 
-> Requires PHP 8.1 or higher. GD extension is recommended.
+> Requires PHP 8.1 or higher and the GD extension.
 
 ## Quick Start
 
@@ -250,7 +250,7 @@ MIT
 
 ![Version](https://img.shields.io/badge/version-2.0.0-blue)
 
-轻量级验证码生成库，PHP 8.1+，零强制依赖。
+轻量级验证码生成库，PHP 8.1+，需要 GD 扩展来渲染图片。
 
 ## 特性
 
@@ -263,7 +263,7 @@ MIT
 - `CaptchaResult` 为 `readonly` 值对象
 - 字符集支持多字节（如中文）
 - `CaptchaVerifier` 提供常时安全、可选忽略大小的校验
-- 零强制依赖（GD 扩展为建议依赖）
+- 需要 GD 扩展（图片由 GD 渲染）
 - 极简 API，不输出任何内容，仅返回数据
 
 ## 安装
@@ -272,7 +272,7 @@ MIT
 composer require migears/captcha
 ```
 
-> 需要 PHP 8.1 及以上，建议安装 GD 扩展。
+> 需要 PHP 8.1 及以上并安装 GD 扩展。
 
 ## 快速开始
 
