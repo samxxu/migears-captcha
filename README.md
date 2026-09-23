@@ -4,6 +4,10 @@
 
 A lightweight captcha generation library for PHP 8.1+, with zero required dependencies.
 
+> **Background**: miGears is the open-source successor of **TinyGears**, a
+> self-developed PHP framework. It was renamed and open-sourced recently because
+> the name *TinyGears* is already taken in the open-source community.
+
 ## Features
 
 - Generates random captcha strings (numbers + letters, configurable length and character set)
