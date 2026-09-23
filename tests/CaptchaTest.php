@@ -141,6 +141,60 @@ final class CaptchaTest extends TestCase
         new Captcha(font: '/nonexistent/font.ttf');
     }
 
+    public function testEmptyCharsThrowsException(): void
+    {
+        $this->expectException(CaptchaException::class);
+        $this->expectExceptionMessage('non-empty');
+
+        new Captcha(chars: '');
+    }
+
+    public function testInvalidLengthThrowsException(): void
+    {
+        foreach ([0, -2] as $length) {
+            try {
+                new Captcha(length: $length);
+                $this->fail("length $length should throw");
+            } catch (CaptchaException $e) {
+                $this->assertSame('Length must be at least 1.', $e->getMessage());
+            }
+        }
+    }
+
+    public function testInvalidDimensionsThrowException(): void
+    {
+        foreach ([[0, 40], [120, 0]] as [$w, $h]) {
+            try {
+                new Captcha(width: $w, height: $h);
+                $this->fail("width=$w height=$h should throw");
+            } catch (CaptchaException $e) {
+                $this->assertSame('Width and height must be at least 1.', $e->getMessage());
+            }
+        }
+    }
+
+    public function testInvalidCharsThrowsException(): void
+    {
+        $this->expectException(CaptchaException::class);
+        $this->expectExceptionMessage('valid UTF-8');
+
+        // Invalid UTF-8 byte sequence
+        new Captcha(chars: "\xFF\xFE invalid");
+    }
+
+    public function testMultibyteCharsProducesValidCode(): void
+    {
+        $captcha = new Captcha(length: 4, chars: '中文验证码');
+        $result = $captcha->generate();
+
+        // Code must be valid UTF-8 and composed solely of the charset characters
+        $this->assertTrue(mb_check_encoding($result->code, 'UTF-8'));
+        $this->assertSame(4, mb_strlen($result->code));
+        foreach (mb_str_split($result->code) as $ch) {
+            $this->assertContains($ch, ['中', '文', '验', '证', '码']);
+        }
+    }
+
     public function testImageFormatEnum(): void
     {
         $this->assertSame('image/png', ImageFormat::Png->mimeType());
