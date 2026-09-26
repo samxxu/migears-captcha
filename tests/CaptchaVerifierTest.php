@@ -61,4 +61,10 @@ final class CaptchaVerifierTest extends TestCase
         // No trimming is performed; exact input is expected
         $this->assertFalse($this->verifier->verify(' a3fK', 'a3fK'));
     }
+
+    public function testFoldIsMultibyteSafe(): void
+    {
+        $this->assertTrue($this->verifier->verify('CAPTCHA É', 'captcha é'));
+        $this->assertTrue($this->verifier->verify('ÄÑéc', 'äñéc'));
+    }
 }

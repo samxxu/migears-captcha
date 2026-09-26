@@ -20,10 +20,22 @@ final class CaptchaVerifier
         }
 
         if ($caseInsensitive) {
-            $submitted = strtolower($submitted);
-            $expected = strtolower($expected);
+            $submitted = $this->fold($submitted);
+            $expected = $this->fold($expected);
         }
 
         return hash_equals($expected, $submitted);
+    }
+
+    /**
+     * Multibyte-aware lowercase folding. mb_strtolower correctly folds Unicode
+     * case variants (e.g. É -> é); strtolower alone would not. Falls back to
+     * strtolower when mbstring is unavailable to keep the package dependency-free.
+     */
+    private function fold(string $value): string
+    {
+        return function_exists('mb_strtolower')
+            ? mb_strtolower($value, 'UTF-8')
+            : strtolower($value);
     }
 }
