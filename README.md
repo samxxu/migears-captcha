@@ -142,6 +142,8 @@ echo $result->imageData;
 Compare a user-submitted answer against the stored code with `CaptchaVerifier`.
 It wraps [timing-safe comparison](https://www.php.net/hash_equals) and optional
 case folding, so callers don't have to implement these details themselves.
+When `mbstring` is available, folding is Unicode-aware (e.g. `É` -> `é`);
+otherwise it falls back to ASCII-only folding.
 
 ```php
 use MiGears\Captcha\CaptchaVerifier;
@@ -382,7 +384,8 @@ echo $result->imageData;
 
 使用 `CaptchaVerifier` 将用户提交的答案与已存储的 code 进行比较。它封装了
 [常时比较](https://www.php.net/hash_equals) 和可选的大小写折叠，调用方无需
-自己实现这些细节。
+自己实现这些细节。装有 `mbstring` 时折叠为 Unicode 感知（如 `É` → `é`），
+否则回退到仅 ASCII 折叠。
 
 ```php
 use MiGears\Captcha\CaptchaVerifier;
