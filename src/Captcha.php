@@ -8,8 +8,6 @@ use MiGears\Captcha\Exception\CaptchaException;
 
 class Captcha
 {
-    public const VERSION = '2.0.0';
-
     private const DEFAULT_CHARS = 'abCDefGhiJkLmNPQrstUVWXyz23456789';
 
     /** @var string[] One character per element (multibyte-aware). */
@@ -60,9 +58,6 @@ class Captcha
         $this->angleRange = $dAngle;
         $this->yDrift = $dDrift;
 
-        if ($this->length < 1) {
-            throw new CaptchaException('Length must be at least 1.');
-        }
         if ($this->width < 1 || $this->height < 1) {
             throw new CaptchaException('Width and height must be at least 1.');
         }
@@ -70,11 +65,19 @@ class Captcha
             throw new CaptchaException('Noise level and line count cannot be negative.');
         }
 
-        $charSet = preg_split('//u', $this->chars, -1, PREG_SPLIT_NO_EMPTY);
-        if ($charSet === false || $charSet === []) {
-            throw new CaptchaException('Chars must be a non-empty valid UTF-8 character set.');
+        if (!$this->math) {
+            if ($this->length < 1) {
+                throw new CaptchaException('Length must be at least 1.');
+            }
+
+            $charSet = preg_split('//u', $this->chars, -1, PREG_SPLIT_NO_EMPTY);
+            if ($charSet === false || $charSet === []) {
+                throw new CaptchaException('Chars must be a non-empty valid UTF-8 character set.');
+            }
+            $this->charSet = $charSet;
+        } else {
+            $this->charSet = [];
         }
-        $this->charSet = $charSet;
     }
 
     /**

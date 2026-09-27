@@ -298,6 +298,16 @@ final class CaptchaTest extends TestCase
         $this->assertNotEmpty($result->imageData);
     }
 
+    public function testMathModeIgnoresLengthAndChars(): void
+    {
+        // README documents length/chars as ignored in math mode; construction
+        // must not validate them when the puzzle is an arithmetic expression.
+        $result = (new Captcha(math: true, length: 0, chars: ''))->generate();
+
+        $this->assertMatchesRegularExpression('/^\d+$/', $result->code);
+        $this->assertNotEmpty($result->imageData);
+    }
+
     public function testMathAnswerRangeIsSane(): void
     {
         $captcha = new Captcha(math: true);

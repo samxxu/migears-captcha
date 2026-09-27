@@ -64,6 +64,8 @@ Pass `math: true` to render an arithmetic puzzle instead of random characters.
 The `code` is the arithmetic result, which is what you store and verify:
 
 ```php
+use MiGears\Captcha\CaptchaVerifier;
+
 $captcha = new Captcha(math: true);
 
 $result = $captcha->generate();
@@ -72,6 +74,7 @@ $result = $captcha->generate();
 echo $result->code;   // "10" — the answer
 
 // Verifying the user's typed answer:
+$verifier = new CaptchaVerifier();
 $ok = $verifier->verify($input, $result->code);
 ```
 
@@ -310,6 +313,8 @@ echo $result->toDataUri();// data:image/png;base64,...
 用于存储和校验：
 
 ```php
+use MiGears\Captcha\CaptchaVerifier;
+
 $captcha = new Captcha(math: true);
 
 $result = $captcha->generate();
@@ -318,6 +323,7 @@ $result = $captcha->generate();
 echo $result->code;   // "10" —— 答案
 
 // 校验用户输入的答案：
+$verifier = new CaptchaVerifier();
 $ok = $verifier->verify($input, $result->code);
 ```
 
