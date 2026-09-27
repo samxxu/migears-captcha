@@ -106,9 +106,12 @@ final class CaptchaTest extends TestCase
         $this->assertNotEmpty($result->code);
         $this->assertNotEmpty($result->mimeType);
 
-        // Verify CaptchaResult is a readonly class
-        $reflection = new \ReflectionClass(CaptchaResult::class);
-        $this->assertTrue($reflection->isReadOnly());
+        // The properties are readonly one by one rather than the class being a
+        // readonly class, which is PHP 8.2 syntax, and ReflectionClass::
+        // isReadOnly() does not exist on the 8.1 this package supports. So
+        // immutability is checked the way a caller meets it: assigning throws.
+        $this->expectException(\Error::class);
+        $result->code = 'changed';
     }
 
     public function testToDataUri(): void
