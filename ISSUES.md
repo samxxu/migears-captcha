@@ -17,19 +17,19 @@ Legend — **P0** functional or security · **P1** documentation that fails when
 
 | | |
 |---|---|
-| Unsettled | P0 0 · P1 0 · P2 1 · P3 2 · other 1 |
-| Settled | 0 of 4 |
-| Waiting on the owner | `P2-1`, `P3-1`, `P3-2` |
-| Waiting on the reviewer | `G2` |
+| Unsettled | P0 0 · P1 0 · P2 1 · P3 0 · other 0 |
+| Settled | 3 of 4 |
+| Waiting on the owner | `P2-1` |
 | Waiting on the coordinator | _nothing_ |
+| Waiting on the reviewer | _nothing_ |
 | Deferred, owing nobody | _nothing_ |
 
 | id | level | status | title |
 |---|---|---|---|
-| [`P2-1`](issues/P2-1.md) | P2 | **open** | The README states `length` and `chars` are 'ignored in math mode'; the … |
-| [`P3-1`](issues/P3-1.md) | P3 | **open** | The README math example calls `$verifier->verify(...)` without … |
-| [`P3-2`](issues/P3-2.md) | P3 | **open** | `Captcha::VERSION` still has zero references while composer and the … |
-| [`G2`](issues/G2.md) | - | **fixed** | Strict flags: `phpunit.xml.dist` currently sets none of the five. The … |
+| [`P2-1`](issues/P2-1.md) | P2 | **accepted** | The README states `length` and `chars` are 'ignored in math mode'; the … |
+| [`P3-1`](issues/P3-1.md) | P3 | **verified** | The README math example calls `$verifier->verify(...)` without … |
+| [`P3-2`](issues/P3-2.md) | P3 | **verified** | `Captcha::VERSION` still has zero references while composer and the … |
+| [`G2`](issues/G2.md) | - | **verified** | Strict flags: `phpunit.xml.dist` currently sets none of the five. The … |
 
 ## Unclosed
 
@@ -38,16 +38,13 @@ highest severity first. `waiting on` is the party who acts next, read from that 
 
 | | |
 |---|---|
-| Unclosed | **4** of 4 |
-| By status | `open` 3 · `fixed` 1 |
-| Waiting on | owner 3 · reviewer 1 |
+| Unclosed | **1** of 4 |
+| By status | `accepted` 1 |
+| Waiting on | owner 1 |
 
 | level | item | status | waiting on | title |
 |---|---|---|---|---|
-| **P2** | [`P2-1`](issues/P2-1.md) | `open` | owner | The README states `length` and `chars` are 'ignored in math mode'; the … |
-| **P3** | [`P3-1`](issues/P3-1.md) | `open` | owner | The README math example calls `$verifier->verify(...)` without … |
-| **P3** | [`P3-2`](issues/P3-2.md) | `open` | owner | `Captcha::VERSION` still has zero references while composer and the … |
-| **-** | [`G2`](issues/G2.md) | `fixed` | reviewer | Strict flags: `phpunit.xml.dist` currently sets none of the five. The … |
+| **P2** | [`P2-1`](issues/P2-1.md) | `accepted` | owner | The README states `length` and `chars` are 'ignored in math mode'; the … |
 
 ## Verdict
 
@@ -88,19 +85,19 @@ No test for GD extension being unavailable (graceful degradation path); no test 
 
 | | |
 |---|---|
-| 未了结 | P0 0 · P1 0 · P2 1 · P3 2 · 其他 1 |
-| 已了结 | 0 / 4 |
-| 等负责人 | `P2-1`, `P3-1`, `P3-2` |
-| 等评审方 | `G2` |
+| 未了结 | P0 0 · P1 0 · P2 1 · P3 0 · 其他 0 |
+| 已了结 | 3 / 4 |
+| 等模块主 | `P2-1` |
 | 等协调人 | _无_ |
+| 等评审方 | _无_ |
 | 已暂缓，不欠谁 | _无_ |
 
 | id | 级别 | 状态 | 标题 |
 |---|---|---|---|
-| [`P2-1`](issues/P2-1.md) | P2 | **open** | README 称 length 与 chars「在 math 模式下被忽略」；实现却无条件校验：new Captcha(math: true, … |
-| [`P3-1`](issues/P3-1.md) | P3 | **open** | README 的 math 示例直接调用 $verifier->verify(...)，未先构造 CaptchaVerifier，照抄即失败。 |
-| [`P3-2`](issues/P3-2.md) | P3 | **open** | Captcha::VERSION 仍零引用，而 composer 与 README 徽章各写一份；phpunit.xml.dist … |
-| [`G2`](issues/G2.md) | - | **fixed** | 严格开关：`phpunit.xml.dist` … |
+| [`P2-1`](issues/P2-1.md) | P2 | **accepted** | README 称 length 与 chars「在 math 模式下被忽略」；实现却无条件校验：new Captcha(math: true, … |
+| [`P3-1`](issues/P3-1.md) | P3 | **verified** | README 的 math 示例直接调用 $verifier->verify(...)，未先构造 CaptchaVerifier，照抄即失败。 |
+| [`P3-2`](issues/P3-2.md) | P3 | **verified** | Captcha::VERSION 仍零引用，而 composer 与 README 徽章各写一份；phpunit.xml.dist … |
+| [`G2`](issues/G2.md) | - | **verified** | 严格开关：`phpunit.xml.dist` … |
 
 ## 未关闭
 
@@ -109,16 +106,13 @@ No test for GD extension being unavailable (graceful degradation path); no test 
 
 | | |
 |---|---|
-| 未关闭 | **4** / 4 |
-| 按状态 | `open` 3 · `fixed` 1 |
-| 等在谁 | 负责人 3 · 评审方 1 |
+| 未关闭 | **1** / 4 |
+| 按状态 | `accepted` 1 |
+| 等在谁 | 模块主 1 |
 
 | 级别 | 条目 | 状态 | 等在谁 | 标题 |
 |---|---|---|---|---|
-| **P2** | [`P2-1`](issues/P2-1.md) | `open` | 负责人 | README 称 length 与 chars「在 math 模式下被忽略」；实现却无条件校验：new Captcha(math: true, … |
-| **P3** | [`P3-1`](issues/P3-1.md) | `open` | 负责人 | README 的 math 示例直接调用 $verifier->verify(...)，未先构造 CaptchaVerifier，照抄即失败。 |
-| **P3** | [`P3-2`](issues/P3-2.md) | `open` | 负责人 | Captcha::VERSION 仍零引用，而 composer 与 README 徽章各写一份；phpunit.xml.dist … |
-| **-** | [`G2`](issues/G2.md) | `fixed` | 评审方 | 严格开关：`phpunit.xml.dist` … |
+| **P2** | [`P2-1`](issues/P2-1.md) | `accepted` | 模块主 | README 称 length 与 chars「在 math 模式下被忽略」；实现却无条件校验：new Captcha(math: true, … |
 
 ## 结论
 
