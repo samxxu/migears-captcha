@@ -22,6 +22,21 @@ A lightweight captcha generation library for PHP 8.1+, requiring the GD extensio
 - Requires the GD extension (images are rendered with GD)
 - Minimalist API, outputs nothing, only returns data
 
+## Boundaries
+
+**In scope**
+
+- Generating a random captcha code and rendering it to an image with GD (`Captcha::generate()`): configurable length, size, custom TTF font, noise, interference lines and character set; PNG / JPEG / GIF output.
+- Math mode (`math: true`) and the preset difficulty levels (`Difficulty::Easy` / `Medium` / `Hard`).
+- `CaptchaResult`, a `readonly` value object carrying `imageData`, `code`, `mimeType` and `toDataUri()`.
+- `CaptchaVerifier::verify()`: a timing-safe (`hash_equals`), optionally case-insensitive comparison helper.
+
+**Not in scope (by design)**
+
+- Storing the generated code (session, cache, ...) — the library does not persist it; caching belongs to `migears/cache`.
+- Expiry and one-time consumption of a code — the library does not track when a code was issued or whether it was already used.
+- Sending the HTTP response — the library outputs nothing and only returns data; emitting headers/body belongs to the caller or the framework.
+
 ## Installation
 
 ```bash
@@ -81,6 +96,10 @@ $ok = $verifier->verify($input, $result->code);
 Uses `+`, `-`, `*` with operands 1–9; subtraction is always positive. When
 `width`/`height` are omitted, math mode defaults to 170×50 (wider to fit the
 extra characters).
+
+`length` and `chars` are ignored in math mode: the puzzle supplies its own
+characters, so neither parameter is used or validated —
+`new Captcha(math: true, length: 0, chars: '')` is accepted.
 
 ### Difficulty
 
@@ -271,6 +290,21 @@ MIT
 - 需要 GD 扩展（图片由 GD 渲染）
 - 极简 API，不输出任何内容，仅返回数据
 
+## 边界
+
+**范围内**
+
+- 用 GD 生成随机验证码并渲染成图片（`Captcha::generate()`）：可配置长度、尺寸、自定义 TTF 字体、噪点、干扰线与字符集；输出 PNG / JPEG / GIF。
+- 数学算式模式（`math: true`）与预设难度档位（`Difficulty::Easy` / `Medium` / `Hard`）。
+- `CaptchaResult`：一个 `readonly` 值对象，携带 `imageData`、`code`、`mimeType` 与 `toDataUri()`。
+- `CaptchaVerifier::verify()`：常时安全（`hash_equals`）、可选忽略大小写的比较辅助方法。
+
+**范围外（刻意不做）**
+
+- 存储生成的 code（session、缓存等）—— 本库不做持久化；缓存由 `migears/cache` 负责。
+- code 的过期与一次性消费 —— 本库不追踪签发时间，也不记录是否已被用过。
+- 发送 HTTP 响应 —— 本库不输出任何内容，仅返回数据；响应头/响应体的发送属于调用方或框架。
+
 ## 安装
 
 ```bash
@@ -329,6 +363,9 @@ $ok = $verifier->verify($input, $result->code);
 
 使用 `+`、`-`、`*`，操作数为 1–9，减法恒为正。当未显式指定 `width`/`height`
 时，数学模式下默认 170×50（更宽以容纳额外字符）。
+
+数学模式下 `length` 与 `chars` 被忽略：题目自带字符，二者既不参与生成也不做
+校验 —— `new Captcha(math: true, length: 0, chars: '')` 会被接受。
 
 ### 难度档位
 
